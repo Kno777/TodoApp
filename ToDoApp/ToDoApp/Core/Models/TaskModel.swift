@@ -6,10 +6,10 @@
 //
 import Foundation
 
-struct TaskModel {
+struct TaskModel: Equatable {
     let id: Int
     let title: String
     let details: String
     let createdAt: Date
-    let isCompleted: Bool
+    var isCompleted: Bool
 }

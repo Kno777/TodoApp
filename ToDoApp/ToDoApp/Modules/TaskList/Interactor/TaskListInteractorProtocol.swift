@@ -10,6 +10,7 @@ protocol TaskListInteractorProtocol: AnyObject {
     func fetchTasks()
     //func deleteTask(_ task: TaskModel)
     func deleteTask(_ task: TaskModel, at index: Int)
+    func toggleTaskCompletion(_ task: TaskModel)
 }
 
 final class TaskListInteractor: TaskListInteractorProtocol {
@@ -34,5 +35,10 @@ final class TaskListInteractor: TaskListInteractorProtocol {
         print(task.title)
         
         TaskCoreDataManager.shared.deleteTask(byId: task.id)
+    }
+    
+    func toggleTaskCompletion(_ task: TaskModel) {
+        let newStatus = !task.isCompleted
+        TaskCoreDataManager.shared.updateTaskCompletion(id: task.id, completed: newStatus)
     }
 }

@@ -112,6 +112,8 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
         let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         cell.configure(with: task)
         
+        cell.delegate = self
+        
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         cell.addGestureRecognizer(longPress)
         
@@ -140,7 +142,7 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
               let cell = gesture.view as? TaskTableViewCell,
               let indexPath = tableView.indexPath(for: cell) else { return }
         
-        let task = tasks[indexPath.row]
+        let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         selectedIndexPath = indexPath
         selectedTask = task
         
@@ -193,25 +195,108 @@ extension TaskListViewController: TaskListViewProtocol {
 
     func showError(_ message: String) {
         print("Error: \(message)")
-        // Optionally show UIAlert
     }
     
-    func deleteRow(at index: Int) {
-        if isFiltering {
-            guard index < filteredTasks.count else { return }
-            let removedTask = filteredTasks.remove(at: index)
+//    func deleteRow(at index: Int) {
+//        
+//        print("deleteRow -- index -- ", index)
+//        
+//        let item = self.isFiltering ? self.filteredTasks[index] : self.tasks[index]
+//        
+//        let indexForRemove = self.isFiltering ? self.filteredTasks.firstIndex(of: item) ?? index  : self.tasks.firstIndex(of: item) ?? index
+//
+//        if self.isFiltering {
+//            self.filteredTasks.remove(at: indexForRemove)
+//            
+//            _ = self.tasks.contains { fav in
+//                if fav.id == item.id {
+//                    let ind = self.tasks.firstIndex(of: fav)
+//                    self.tasks.remove(at: ind ?? index)
+//                }
+//                return false
+//            }
+//            
+//            tableView.beginUpdates()
+//            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+//            tableView.endUpdates()
+//            
+//            updateTasks(tasks)
+//        } else {
+//            self.tasks.remove(at: indexForRemove)
+//            
+//            tableView.beginUpdates()
+//            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+//            tableView.endUpdates()
+//            
+//            updateTasks(tasks)
+//        }
+//        
+////        if isFiltering {
+////            guard index < filteredTasks.count else { return }
+////            let removedTask = filteredTasks.remove(at: index)
+////
+////            // Also remove it from full tasks list
+////            if let fullIndex = tasks.firstIndex(where: { $0.id == removedTask.id }) {
+////                tasks.remove(at: fullIndex)
+////            }
+////        } else {
+////            guard index < tasks.count else { return }
+////            tasks.remove(at: index)
+////        }
+////
+////        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+////        updateTasks(tasks)
+//    }
 
-            // Also remove it from full tasks list
-            if let fullIndex = tasks.firstIndex(where: { $0.id == removedTask.id }) {
+    func deleteRow(at index: Int) {
+        let item = isFiltering ? filteredTasks[index] : tasks[index]
+
+        if isFiltering {
+            // Remove from filteredTasks
+            filteredTasks.remove(at: index)
+
+            // Remove from main tasks as well
+            if let fullIndex = tasks.firstIndex(where: { $0.id == item.id }) {
                 tasks.remove(at: fullIndex)
             }
         } else {
-            guard index < tasks.count else { return }
             tasks.remove(at: index)
         }
 
-        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        // Reload instead of delete if only 1 item (for smooth animation)
+        let remainingCount = isFiltering ? filteredTasks.count : tasks.count
+        if remainingCount == 0 {
+            tableView.reloadData()
+        } else {
+            tableView.beginUpdates()
+            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+            tableView.endUpdates()
+        }
+
         updateTasks(tasks)
     }
+    
+    func updateRow(at index: Int) {
+        if isFiltering {
+            filteredTasks[index].isCompleted.toggle()
+        } else {
+            tasks[index].isCompleted.toggle()
+        }
+        
+        tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+    }
 
+
+}
+
+
+extension TaskListViewController: TaskTableViewCellDelegate {
+    func didToggleCompletion(for task: TaskModel) {
+        
+        let tasksItems = isFiltering ? filteredTasks : tasks
+
+        guard let index = tasksItems.firstIndex(where: { $0.id == task.id }) else { return }
+
+        presenter?.didToggleCompletion(for: task, at: index)
+    }
 }

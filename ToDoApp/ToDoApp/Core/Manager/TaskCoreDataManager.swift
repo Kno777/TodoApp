@@ -107,4 +107,20 @@ final class TaskCoreDataManager {
             print("Update error: \(error)")
         }
     }
+    
+    
+    func updateTaskCompletion(id: Int, completed: Bool) {
+        let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %d", id)
+
+        do {
+            if let task = try context.fetch(request).first {
+                task.isCompleted = completed
+                CoreDataStack.shared.saveContext()
+            }
+        } catch {
+            print("Update completion error: \(error)")
+        }
+    }
+
 }

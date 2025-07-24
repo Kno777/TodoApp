@@ -32,6 +32,11 @@ final class TaskListPresenter {
         view?.deleteRow(at: index)
         interactor?.deleteTask(task, at: index)
     }
+    
+    func didToggleCompletion(for task: TaskModel, at index: Int) {
+        interactor?.toggleTaskCompletion(task)
+        view?.updateRow(at: index)
+    }
 }
 
 
