@@ -23,8 +23,14 @@ final class CoreDataStack {
         return container
     }()
 
+    // Main context (for UI/main thread usage)
     var context: NSManagedObjectContext {
         return persistentContainer.viewContext
+    }
+
+    // Creates a new private background context
+    func newBackgroundContext() -> NSManagedObjectContext {
+        return persistentContainer.newBackgroundContext()
     }
 
     func saveContext() {
@@ -38,3 +44,4 @@ final class CoreDataStack {
         }
     }
 }
+

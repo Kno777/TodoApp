@@ -9,4 +9,5 @@
 protocol TaskListViewProtocol: AnyObject {
     func showTasks(_ tasks: [TaskModel])
     func showError(_ message: String)
+    func deleteRow(at index: Int)
 }

@@ -8,6 +8,8 @@ import Foundation
 
 protocol TaskListInteractorProtocol: AnyObject {
     func fetchTasks()
+    //func deleteTask(_ task: TaskModel)
+    func deleteTask(_ task: TaskModel, at index: Int)
 }
 
 final class TaskListInteractor: TaskListInteractorProtocol {
@@ -18,12 +20,19 @@ final class TaskListInteractor: TaskListInteractorProtocol {
             switch result {
             case .success(let apiTasks):
                 let tasks = apiTasks.map {
-                    $0.toTaskModel()
+                    $0
                 }
                 self?.presenter?.didFetchTasks(tasks)
             case .failure(let error):
                 self?.presenter?.didFailToFetchTasks(error)
             }
         }
+    }
+    
+    func deleteTask(_ task: TaskModel, at index: Int) {
+        
+        print(task.title)
+        
+        TaskCoreDataManager.shared.deleteTask(byId: task.id)
     }
 }

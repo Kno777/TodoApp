@@ -8,11 +8,12 @@
 
 import UIKit
 
-final class TaskListViewController: UITableViewController {
-
+final class TaskListViewController: UITableViewController, UIContextMenuInteractionDelegate {
     var presenter: TaskListPresenter?
     private var tasks: [TaskModel] = []
     private var filteredTasks: [TaskModel] = []
+    private var selectedTask: TaskModel?
+    private var selectedIndexPath: IndexPath?
     private let searchController = UISearchController(searchResultsController: nil)
 
     private let bottomView = UIView()
@@ -23,8 +24,8 @@ final class TaskListViewController: UITableViewController {
         super.viewDidLoad()
         setupUI()
         setupSearchController()
-        setupBottomView()
         presenter?.viewDidLoad()
+        setupBottomView()
     }
 
     // MARK: - UI Setup
@@ -72,7 +73,7 @@ final class TaskListViewController: UITableViewController {
         ])
 
         // Task Count Label (center)
-        taskCountLabel.text = "0 tasks"
+        taskCountLabel.text = "\(tasks.count) tasks"
         taskCountLabel.textColor = AppColors.primaryTextColor
         taskCountLabel.font = .systemFont(ofSize: 16, weight: .medium)
         taskCountLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -110,6 +111,10 @@ final class TaskListViewController: UITableViewController {
         }
         let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         cell.configure(with: task)
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        cell.addGestureRecognizer(longPress)
+        
         return cell
     }
 
@@ -120,9 +125,50 @@ final class TaskListViewController: UITableViewController {
     }
 
     func updateTasks(_ tasks: [TaskModel]) {
-        self.tasks = tasks
-        taskCountLabel.text = "We have \(tasks.count) tasks"
-        tableView.reloadData()
+        
+        print("task count -- ", tasks.count)
+        
+        DispatchQueue.main.async {
+            self.taskCountLabel.text = "\(tasks.count) tasks"
+        }
+    }
+    
+    // MARK: - Selectors
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began,
+              let cell = gesture.view as? TaskTableViewCell,
+              let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        let task = tasks[indexPath.row]
+        selectedIndexPath = indexPath
+        selectedTask = task
+        
+        let interaction = UIContextMenuInteraction(delegate: self)
+        cell.addInteraction(interaction)
+    }
+
+    // MARK: - UIContextMenuInteractionDelegate
+    
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction,
+                                configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            guard let task = self.selectedTask else { return nil }
+            guard let indexPath = self.selectedIndexPath else { return nil }
+            
+            return UIMenu(title: "", children: [
+                UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                    self.presenter?.didTapEdit(task)
+                },
+                UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                    self.presenter?.didTapShare(task)
+                },
+                UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                    self.presenter?.didTapDelete(task, at: indexPath.row)
+                }
+            ])
+        }
     }
 }
 
@@ -142,10 +188,30 @@ extension TaskListViewController: TaskListViewProtocol {
     func showTasks(_ tasks: [TaskModel]) {
         self.tasks = tasks
         tableView.reloadData()
+        updateTasks(tasks)
     }
 
     func showError(_ message: String) {
         print("Error: \(message)")
         // Optionally show UIAlert
     }
+    
+    func deleteRow(at index: Int) {
+        if isFiltering {
+            guard index < filteredTasks.count else { return }
+            let removedTask = filteredTasks.remove(at: index)
+
+            // Also remove it from full tasks list
+            if let fullIndex = tasks.firstIndex(where: { $0.id == removedTask.id }) {
+                tasks.remove(at: fullIndex)
+            }
+        } else {
+            guard index < tasks.count else { return }
+            tasks.remove(at: index)
+        }
+
+        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        updateTasks(tasks)
+    }
+
 }

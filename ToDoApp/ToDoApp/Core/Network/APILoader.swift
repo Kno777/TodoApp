@@ -19,16 +19,25 @@ final class APILoader {
     
     static let shared = APILoader()
     private init() {}
+    
+    private var hasLoadedFromAPI: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasLoadedFromAPI") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasLoadedFromAPI") }
+    }
 
-    func loadTasks(completion: @escaping (Result<[APITask], Error>) -> Void) {
-        guard let url = URL(string: "https://dummyjson.com/todos") else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
+    func loadTasks(completion: @escaping (Result<[TaskModel], Error>) -> Void) {
+        if hasLoadedFromAPI {
+            // Load from Core Data
+            let tasks = TaskCoreDataManager.shared.fetchTasks()
+            completion(.success(tasks))
+        } else {
+            // Load from API
+            guard let url = URL(string: "https://dummyjson.com/todos") else {
+                completion(.failure(APIError.invalidURL))
+                return
+            }
 
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            // Ensure UI stays responsive
-            DispatchQueue.global(qos: .background).async {
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let error = error {
                     DispatchQueue.main.async {
                         completion(.failure(error))
@@ -45,17 +54,26 @@ final class APILoader {
 
                 do {
                     let decoded = try JSONDecoder().decode(TaskAPIResponse.self, from: data)
+
+                    // Save to Core Data
+                    TaskCoreDataManager.shared.saveTasks(decoded.todos)
+                    self.hasLoadedFromAPI = true
+
+                    // Fetch again from Core Data and return models
+                    let savedTasks = TaskCoreDataManager.shared.fetchTasks()
                     DispatchQueue.main.async {
-                        completion(.success(decoded.todos))
+                        completion(.success(savedTasks))
                     }
+
                 } catch {
                     DispatchQueue.main.async {
                         completion(.failure(error))
                     }
                 }
             }
-        }
 
-        task.resume()
+            task.resume()
+        }
     }
+
 }

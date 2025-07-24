@@ -14,11 +14,26 @@ protocol TaskListPresenterProtocol: AnyObject {
 final class TaskListPresenter {
     weak var view: TaskListViewProtocol?
     var interactor: TaskListInteractorProtocol?
+    var router: TaskListRouterProtocol?
 
     func viewDidLoad() {
         interactor?.fetchTasks()
     }
+    
+    func didTapEdit(_ task: TaskModel) {
+        router?.showEditScreen(for: task)
+    }
+    
+    func didTapShare(_ task: TaskModel) {
+        router?.presentShareSheet(for: task)
+    }
+
+    func didTapDelete(_ task: TaskModel, at index: Int) {
+        view?.deleteRow(at: index)
+        interactor?.deleteTask(task, at: index)
+    }
 }
+
 
 extension TaskListPresenter: TaskListPresenterProtocol {
     func didFetchTasks(_ tasks: [TaskModel]) {
