@@ -25,10 +25,26 @@ final class TaskCoreDataManager {
 
         CoreDataStack.shared.saveContext()
     }
+    
+    func createTask(title: String, body: String) -> TaskModel {
+        let task = TaskEntity(context: context)
+        task.id = Int64(Date().timeIntervalSince1970 * 1000)
+        task.title = title
+        task.details = body
+        task.createdAt = Date()
+        task.isCompleted = false
+
+        CoreDataStack.shared.saveContext()
+
+        return TaskModel(from: task)
+    }
+
 
     // MARK: - Fetch Tasks from Core Data
     func fetchTasks() -> [TaskModel] {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
+        let sort = NSSortDescriptor(key: "createdAt", ascending: false)
+        request.sortDescriptors = [sort]
 
         do {
             let results = try context.fetch(request)

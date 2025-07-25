@@ -88,6 +88,7 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
         // Create Task Button (left)
         createTaskButton.setImage(AppImage.addTaskIcon, for: .normal)
         createTaskButton.translatesAutoresizingMaskIntoConstraints = false
+        createTaskButton.addTarget(self, action: #selector(didTapCreateTask), for: .touchUpInside)
         bottomView.addSubview(createTaskButton)
         
         NSLayoutConstraint.activate([
@@ -136,6 +137,14 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
     }
     
     // MARK: - Selectors
+    
+    @objc private func didTapCreateTask() {
+        let createTaskVC = CreateTaskRouter.assembleModule(delegate: presenter)
+        navigationItem.leftBarButtonItem?.tintColor = AppColors.yellow
+        navigationItem.backBarButtonItem?.tintColor = AppColors.yellow
+        navigationItem.backButtonTitle = "Назад"
+        navigationController?.pushViewController(createTaskVC, animated: true)
+    }
     
     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began,
@@ -286,7 +295,14 @@ extension TaskListViewController: TaskListViewProtocol {
         tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .fade)
     }
 
-
+    func insertRow(at index: Int) {
+        tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    }
+    
+    func reloadTableView(with tasks: [TaskModel]) {
+        self.tasks = tasks
+        tableView.reloadData()
+    }
 }
 
 

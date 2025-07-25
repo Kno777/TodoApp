@@ -12,6 +12,7 @@ protocol TaskListPresenterProtocol: AnyObject {
 }
 
 final class TaskListPresenter {
+    var tasks: [TaskModel] = []
     weak var view: TaskListViewProtocol?
     var interactor: TaskListInteractorProtocol?
     var router: TaskListRouterProtocol?

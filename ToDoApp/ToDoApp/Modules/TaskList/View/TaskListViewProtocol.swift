@@ -11,4 +11,6 @@ protocol TaskListViewProtocol: AnyObject {
     func showError(_ message: String)
     func deleteRow(at index: Int)
     func updateRow(at index: Int)
+    func insertRow(at index: Int)
+    func reloadTableView(with tasks: [TaskModel])
 }

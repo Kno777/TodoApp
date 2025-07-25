@@ -11,6 +11,7 @@ protocol TaskListInteractorProtocol: AnyObject {
     //func deleteTask(_ task: TaskModel)
     func deleteTask(_ task: TaskModel, at index: Int)
     func toggleTaskCompletion(_ task: TaskModel)
+    func fetchTasksFromDB() -> [TaskModel]
 }
 
 final class TaskListInteractor: TaskListInteractorProtocol {
@@ -40,5 +41,9 @@ final class TaskListInteractor: TaskListInteractorProtocol {
     func toggleTaskCompletion(_ task: TaskModel) {
         let newStatus = !task.isCompleted
         TaskCoreDataManager.shared.updateTaskCompletion(id: task.id, completed: newStatus)
+    }
+    
+    func fetchTasksFromDB() -> [TaskModel] {
+        return TaskCoreDataManager.shared.fetchTasks()
     }
 }

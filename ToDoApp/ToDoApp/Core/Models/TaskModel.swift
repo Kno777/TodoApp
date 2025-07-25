@@ -13,3 +13,13 @@ struct TaskModel: Equatable {
     let createdAt: Date
     var isCompleted: Bool
 }
+
+extension TaskModel {
+    init(from entity: TaskEntity) {
+        self.id = Int(entity.id)
+        self.title = entity.title ?? ""
+        self.details = entity.details ?? ""
+        self.createdAt = entity.createdAt ?? Date()
+        self.isCompleted = entity.isCompleted
+    }
+}
