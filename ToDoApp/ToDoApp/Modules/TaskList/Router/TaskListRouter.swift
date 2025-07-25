@@ -9,13 +9,11 @@
 import UIKit
 
 protocol TaskListRouterProtocol: AnyObject {
-    func showEditScreen(for task: TaskModel)
     func presentShareSheet(for task: TaskModel)
 }
 
 
 final class TaskListRouter: TaskListRouterProtocol {
-    
     weak var viewController: UIViewController?
     
     static func createModule() -> UIViewController {
@@ -35,15 +33,8 @@ final class TaskListRouter: TaskListRouterProtocol {
         return view
     }
     
-    func showEditScreen(for task: TaskModel) {
-        print("Tap Edit Button")
-        //let editVC = EditTaskViewController(task: task)
-        //viewController?.navigationController?.pushViewController(editVC, animated: true)
-    }
-    
     func presentShareSheet(for task: TaskModel) {
-        print("Tap Share Button")
-        let activityVC = UIActivityViewController(activityItems: [task.title], applicationActivities: nil)
+        let activityVC = UIActivityViewController(activityItems: [task.title, task.details], applicationActivities: nil)
         viewController?.present(activityVC, animated: true, completion: nil)
     }
 }

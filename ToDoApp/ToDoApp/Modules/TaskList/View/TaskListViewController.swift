@@ -31,7 +31,7 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
     // MARK: - UI Setup
 
     private func setupUI() {
-        title = "Tasks"
+        title = "Задачи"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [.foregroundColor: AppColors.primaryTextColor]
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: AppColors.primaryTextColor ]
@@ -50,7 +50,7 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
     private func setupSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Tasks"
+        searchController.searchBar.placeholder = "Поиск"
         searchController.searchBar.barStyle = .black
         searchController.searchBar.searchTextField.textColor = AppColors.primaryTextColor
         searchController.searchBar.tintColor = AppColors.primaryTextColor
@@ -128,11 +128,8 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
     }
 
     func updateTasks(_ tasks: [TaskModel]) {
-        
-        print("task count -- ", tasks.count)
-        
         DispatchQueue.main.async {
-            self.taskCountLabel.text = "\(tasks.count) tasks"
+            self.taskCountLabel.text = "\(tasks.count) Задач"
         }
     }
     
@@ -169,13 +166,14 @@ final class TaskListViewController: UITableViewController, UIContextMenuInteract
             guard let indexPath = self.selectedIndexPath else { return nil }
             
             return UIMenu(title: "", children: [
-                UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { _ in
+                    self.presenter?.viewController = self
                     self.presenter?.didTapEdit(task)
                 },
-                UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                UIAction(title: "Поделиться", image: UIImage(systemName: "square.and.arrow.up")) { _ in
                     self.presenter?.didTapShare(task)
                 },
-                UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
                     self.presenter?.didTapDelete(task, at: indexPath.row)
                 }
             ])
@@ -206,57 +204,6 @@ extension TaskListViewController: TaskListViewProtocol {
         print("Error: \(message)")
     }
     
-//    func deleteRow(at index: Int) {
-//        
-//        print("deleteRow -- index -- ", index)
-//        
-//        let item = self.isFiltering ? self.filteredTasks[index] : self.tasks[index]
-//        
-//        let indexForRemove = self.isFiltering ? self.filteredTasks.firstIndex(of: item) ?? index  : self.tasks.firstIndex(of: item) ?? index
-//
-//        if self.isFiltering {
-//            self.filteredTasks.remove(at: indexForRemove)
-//            
-//            _ = self.tasks.contains { fav in
-//                if fav.id == item.id {
-//                    let ind = self.tasks.firstIndex(of: fav)
-//                    self.tasks.remove(at: ind ?? index)
-//                }
-//                return false
-//            }
-//            
-//            tableView.beginUpdates()
-//            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-//            tableView.endUpdates()
-//            
-//            updateTasks(tasks)
-//        } else {
-//            self.tasks.remove(at: indexForRemove)
-//            
-//            tableView.beginUpdates()
-//            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-//            tableView.endUpdates()
-//            
-//            updateTasks(tasks)
-//        }
-//        
-////        if isFiltering {
-////            guard index < filteredTasks.count else { return }
-////            let removedTask = filteredTasks.remove(at: index)
-////
-////            // Also remove it from full tasks list
-////            if let fullIndex = tasks.firstIndex(where: { $0.id == removedTask.id }) {
-////                tasks.remove(at: fullIndex)
-////            }
-////        } else {
-////            guard index < tasks.count else { return }
-////            tasks.remove(at: index)
-////        }
-////
-////        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .fade)
-////        updateTasks(tasks)
-//    }
-
     func deleteRow(at index: Int) {
         let item = isFiltering ? filteredTasks[index] : tasks[index]
 

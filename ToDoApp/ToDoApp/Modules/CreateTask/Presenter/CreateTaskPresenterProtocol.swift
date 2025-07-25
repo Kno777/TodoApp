@@ -16,6 +16,7 @@ protocol TaskCreationDelegate: AnyObject {
 
 
 final class CreateTaskPresenter: CreateTaskPresenterProtocol, CreateTaskInteractorOutputProtocol {
+    var taskToEdit: TaskModel?
     weak var view: CreateTaskViewProtocol?
     var interactor: CreateTaskInteractorInputProtocol?
     var router: CreateTaskRouterProtocol?
@@ -26,10 +27,21 @@ final class CreateTaskPresenter: CreateTaskPresenterProtocol, CreateTaskInteract
             view?.showError("Title is required")
             return
         }
-        interactor?.saveTask(title: title, body: body)
+
+        if let task = taskToEdit {
+            interactor?.updateTask(task, title: title, body: body)
+        } else {
+            interactor?.saveTask(title: title, body: body)
+        }
     }
+
     
     func taskSaved(_ task: TaskModel) {
+        delegate?.didCreateTask(task)
+        router?.dismiss()
+    }
+    
+    func taskUpdated(_ task: TaskModel) {
         delegate?.didCreateTask(task)
         router?.dismiss()
     }

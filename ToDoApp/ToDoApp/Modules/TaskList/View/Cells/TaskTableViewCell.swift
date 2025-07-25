@@ -99,39 +99,9 @@ final class TaskTableViewCell: UITableViewCell {
     @objc private func statusTapped() {
         guard let task = task else { return }
         
-        print("statusTapped")
-        
         delegate?.didToggleCompletion(for: task)
     }
     
-    //    func configure(with task: TaskModel) {
-    //        if !task.details.isEmpty {
-    //            detailsLabel.text = task.details
-    //        }
-    //
-    //        creationDateLabel.text = DateFormatter.taskDateFormatter.string(from: task.createdAt)
-    //
-    //        if task.isCompleted {
-    //
-    //            let attributedText = NSAttributedString(
-    //                string: task.title,
-    //                attributes: [
-    //                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
-    //                    .foregroundColor: AppColors.secondaryTextColor
-    //                ]
-    //            )
-    //
-    //            titleLabel.attributedText = attributedText
-    //            titleLabel.textColor = AppColors.secondaryTextColor
-    //            detailsLabel.textColor = AppColors.secondaryTextColor
-    //            statusImageView.image = AppImage.taskCompletedIcon
-    //        } else {
-    //            titleLabel.text = task.title
-    //            titleLabel.textColor = AppColors.primaryTextColor
-    //            detailsLabel.textColor = AppColors.primaryTextColor
-    //            statusImageView.image = AppImage.taskNotCompletedIcon
-    //        }
-    //    }
     
     // MARK: - Configuration
     func configure(with task: TaskModel) {

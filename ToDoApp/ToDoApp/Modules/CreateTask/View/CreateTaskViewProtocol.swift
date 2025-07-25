@@ -12,7 +12,7 @@ protocol CreateTaskViewProtocol: AnyObject {
 
 final class CreateTaskViewController: UIViewController {
     
-    var presenter: CreateTaskPresenterProtocol?
+    var presenter: CreateTaskPresenter?
     
     private let titleField = UITextField()
     private let bodyField = UITextView()
@@ -21,23 +21,30 @@ final class CreateTaskViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        if let task = presenter?.taskToEdit {
+            title = "Редактировать задачу"
+            titleField.text = task.title
+            bodyField.text = task.details
+            saveButton.setTitle("Обновлять", for: .normal)
+        }
     }
     
     private func setupUI() {
         view.backgroundColor = AppColors.primaryBackgroundColor
-        title = "Create Task"
+        title = "Создать задачу"
         navigationItem.leftBarButtonItem?.tintColor = AppColors.yellow
         navigationItem.backBarButtonItem?.tintColor = AppColors.yellow
         navigationItem.backButtonTitle = "Назад"
 
-        titleField.placeholder = "Enter title"
+        titleField.placeholder = "Введите заголовок"
         titleField.borderStyle = .roundedRect
         
         bodyField.layer.borderColor = UIColor.lightGray.cgColor
         bodyField.layer.borderWidth = 1
         bodyField.layer.cornerRadius = 8
         
-        saveButton.setTitle("Save", for: .normal)
+        saveButton.setTitle("Сохранять", for: .normal)
         saveButton.setTitleColor(AppColors.primaryTextColor, for: .normal)
         saveButton.backgroundColor = AppColors.yellow
         saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)

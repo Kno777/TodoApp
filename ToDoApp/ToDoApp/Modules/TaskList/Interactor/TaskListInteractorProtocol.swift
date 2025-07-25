@@ -32,15 +32,13 @@ final class TaskListInteractor: TaskListInteractorProtocol {
     }
     
     func deleteTask(_ task: TaskModel, at index: Int) {
-        
-        print(task.title)
-        
         TaskCoreDataManager.shared.deleteTask(byId: task.id)
     }
     
     func toggleTaskCompletion(_ task: TaskModel) {
         let newStatus = !task.isCompleted
-        TaskCoreDataManager.shared.updateTaskCompletion(id: task.id, completed: newStatus)
+        
+        TaskCoreDataManager.shared.updateTaskCompletion(id: Int64(task.id), completed: newStatus)
     }
     
     func fetchTasksFromDB() -> [TaskModel] {

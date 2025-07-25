@@ -5,6 +5,7 @@
 //  Created by Kno Harutyunyan on 24.07.25.
 //
 import Foundation
+import UIKit
 
 protocol TaskListPresenterProtocol: AnyObject {
     func didFetchTasks(_ tasks: [TaskModel])
@@ -13,6 +14,7 @@ protocol TaskListPresenterProtocol: AnyObject {
 
 final class TaskListPresenter {
     var tasks: [TaskModel] = []
+    var viewController: UIViewController?
     weak var view: TaskListViewProtocol?
     var interactor: TaskListInteractorProtocol?
     var router: TaskListRouterProtocol?
@@ -22,7 +24,8 @@ final class TaskListPresenter {
     }
     
     func didTapEdit(_ task: TaskModel) {
-        router?.showEditScreen(for: task)
+        let createVC = CreateTaskRouter.assembleModule(taskToEdit: task, delegate: self)
+        viewController?.navigationController?.pushViewController(createVC, animated: true)
     }
     
     func didTapShare(_ task: TaskModel) {

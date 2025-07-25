@@ -28,7 +28,8 @@ final class TaskCoreDataManager {
     
     func createTask(title: String, body: String) -> TaskModel {
         let task = TaskEntity(context: context)
-        task.id = Int64(Date().timeIntervalSince1970 * 1000)
+        let newId = Int64(Date().timeIntervalSince1970 * 1000)
+        task.id = newId
         task.title = title
         task.details = body
         task.createdAt = Date()
@@ -82,7 +83,7 @@ final class TaskCoreDataManager {
 
         backgroundContext.perform {
             let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
-            request.predicate = NSPredicate(format: "id == %d", id)
+            request.predicate = NSPredicate(format: "id == %@", NSNumber(value: id))
 
             do {
                 if let task = try backgroundContext.fetch(request).first {
@@ -107,10 +108,11 @@ final class TaskCoreDataManager {
 
 
     // MARK: - Optional: Update a Task
-    func updateTask(id: Int, newTitle: String, newDetails: String, completed: Bool) {
+    func updateTask(id: Int64, newTitle: String, newDetails: String, completed: Bool) -> TaskModel? {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %d", id)
-
+        //request.predicate = NSPredicate(format: "id == %d", id)
+        request.predicate = NSPredicate(format: "id == %@", NSNumber(value: id))
+        
         do {
             if let task = try context.fetch(request).first {
                 task.title = newTitle
@@ -118,16 +120,18 @@ final class TaskCoreDataManager {
                 task.isCompleted = completed
                 task.createdAt = Date()
                 CoreDataStack.shared.saveContext()
+                return TaskModel(from: task)
             }
         } catch {
             print("Update error: \(error)")
         }
+        return nil
     }
     
     
-    func updateTaskCompletion(id: Int, completed: Bool) {
+    func updateTaskCompletion(id: Int64, completed: Bool) {
         let request: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %d", id)
+        request.predicate = NSPredicate(format: "id == %@", NSNumber(value: id))
 
         do {
             if let task = try context.fetch(request).first {
